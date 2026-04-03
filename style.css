@@ -1,0 +1,168 @@
+body {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: #f0f2f5;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 650px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+.navbar {
+  display: flex;
+  background: #222;
+  justify-content: space-around;
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.navbar button {
+  background: none;
+  border: none;
+  color: #bbb;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.navbar button:hover {
+  color: #fff;
+}
+
+.page {
+  display: none;
+  padding: 10px 0;
+}
+.active {
+  display: block;
+}
+
+.summary-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #eee;
+  margin-bottom: 25px;
+}
+.card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  margin-bottom: 20px;
+}
+
+/* Form Style */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.input-group label {
+  font-weight: bold;
+  font-size: 0.9em;
+  color: #555;
+}
+input,
+select {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.btn-main {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+.btn-main:hover {
+  background: #0056b3;
+}
+
+/* Table Style */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.85em;
+}
+th,
+td {
+  border-bottom: 1px solid #eee;
+  padding: 12px 8px;
+  text-align: left;
+}
+.btn-hapus {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* PROFILE GRID FIXED */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 kolom di desktop */
+  gap: 20px;
+}
+
+.grid-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.grid-item label {
+  font-weight: bold;
+  color: #666;
+  font-size: 0.85em;
+}
+.readonly-input {
+  background-color: #f9f9f9 !important;
+  border: 1px dashed #ccc !important;
+  color: #007bff !important;
+  font-weight: bold;
+}
+
+.ideal-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #eee;
+  text-align: center;
+}
+.ideal-box {
+  font-size: 30px;
+  font-weight: bold;
+  color: #28a745;
+  background: #eef9f1;
+  display: inline-block;
+  padding: 10px 30px;
+  border-radius: 50px;
+  margin: 10px 0;
+}
+
+/* Responsive Mobile */
+@media (max-width: 500px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  } /* Jadi 1 kolom di HP */
+  .container {
+    margin: 10px;
+    padding: 15px;
+  }
+}
