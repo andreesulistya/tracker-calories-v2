@@ -17,7 +17,7 @@ function tambahItem() {
     
     let tglFinal = inputDate ? new Date(inputDate).toLocaleDateString('id-ID') : new Date().toLocaleDateString('id-ID');
 
-    if (!nama || isNaN(kalori)) return alert("Isi data dengan lengkap!");
+    if (!nama || isNaN(kalori)) return alert("Lengkapi data!");
 
     logs.push({ tanggal: tglFinal, nama, tipe, kalori });
     saveData();
@@ -30,6 +30,7 @@ function tambahItem() {
 }
 
 function hitungBMR() {
+    const bmrDate = document.getElementById('bmrDate').value;
     const gender = document.getElementById('gender').value;
     const age = parseInt(document.getElementById('bmr-age').value);
     const weight = parseFloat(document.getElementById('bmr-weight').value);
@@ -38,20 +39,28 @@ function hitungBMR() {
 
     if (!weight || !height || !age) return alert("Lengkapi data fisik!");
 
-    let bmr = (10 * weight) + (6.25 * height) - (5 * age);
-    bmr = (gender === 'male') ? bmr + 5 : bmr - 161;
-    const tdee = Math.round(bmr * act);
+    let tglFinal = bmrDate ? new Date(bmrDate).toLocaleDateString('id-ID') : new Date().toLocaleDateString('id-ID');
 
-    riwayatFisik.push({ tanggal: new Date().toLocaleDateString('id-ID'), berat: weight, bmr: Math.round(bmr), tdee: tdee });
-    profile = { ...profile, age, weight, height, bmr: Math.round(bmr), tdee };
+    let bmrVal = (10 * weight) + (6.25 * height) - (5 * age);
+    bmrVal = (gender === 'male') ? bmrVal + 5 : bmrVal - 161;
+    const tdeeVal = Math.round(bmrVal * act);
+
+    riwayatFisik.push({ tanggal: tglFinal, berat: weight, bmr: Math.round(bmrVal), tdee: tdeeVal });
+    profile = { ...profile, age, weight, height, bmr: Math.round(bmrVal), tdee: tdeeVal };
 
     saveData();
+    
+    const resBox = document.getElementById('bmr-result');
+    resBox.style.display = 'block';
+    resBox.innerHTML = `<div style="background:#e8f5e9; padding:15px; border-radius:8px; border:1px solid #4caf50; color:#2e7d32;">
+        <strong>Tersimpan!</strong> TDEE: ${tdeeVal} kcal</div>`;
+
+    document.getElementById('bmrDate').value = '';
     updateUI();
-    showPage('profile');
 }
 
 function updateUI() {
-    // Dashboard Log
+    // Detail Dashboard
     const tbodyLog = document.getElementById('tableBody');
     let totalIn = 0, totalOut = 0;
     if (tbodyLog) {
@@ -70,7 +79,7 @@ function updateUI() {
         document.getElementById('dashNet').innerHTML = `${net} kcal <span style="color:${color}; font-weight:normal; font-size:0.7em; margin-left:5px;">${ket}</span>`;
     }
 
-    // Rekapitulasi
+    // Rekap Harian
     const rekapBody = document.getElementById('rekapTableBody');
     if (rekapBody) {
         rekapBody.innerHTML = '';
@@ -88,14 +97,24 @@ function updateUI() {
         });
     }
 
-    // Profil Page Update
+    // Riwayat BMR (FIXED)
+    const tbodyBmr = document.getElementById('bmrTableBody');
+    if (tbodyBmr) {
+        tbodyBmr.innerHTML = '';
+        [...riwayatFisik].reverse().forEach((item, index) => {
+            const originalIndex = riwayatFisik.length - 1 - index;
+            tbodyBmr.innerHTML += `<tr><td>${item.tanggal}</td><td>${item.berat} kg</td><td>${item.bmr}</td><td>${item.tdee}</td>
+                <td><button class="btn-hapus" onclick="hapusBMR(${originalIndex})">x</button></td></tr>`;
+        });
+    }
+
+    // Profil Page
     document.getElementById('profName').value = profile.name || '';
     document.getElementById('dispAge').value = profile.age ? profile.age + " Tahun" : "-";
     document.getElementById('dispWeight').value = profile.weight ? profile.weight + " kg" : "-";
     document.getElementById('dispHeight').value = profile.height ? profile.height + " cm" : "-";
     document.getElementById('dispBmr').value = profile.bmr ? profile.bmr + " kcal" : "-";
     document.getElementById('dispTdee').value = profile.tdee ? profile.tdee + " kcal" : "-";
-    
     if (profile.height > 0) {
         const ideal = (profile.height - 100) - ((profile.height - 100) * 0.1);
         document.getElementById('idealWeight').innerText = ideal.toFixed(1);
@@ -110,3 +129,4 @@ function saveData() {
 
 function saveProfile() { profile.name = document.getElementById('profName').value; saveData(); }
 function hapusLog(i) { if(confirm("Hapus?")) { logs.splice(i,1); saveData(); updateUI(); } }
+function hapusBMR(i) { if(confirm("Hapus riwayat?")) { riwayatFisik.splice(i,1); saveData(); updateUI(); } }
