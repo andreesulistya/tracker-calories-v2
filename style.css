@@ -47,7 +47,7 @@ body {
 }
 .card {
   background: #fff;
-  padding: 20px;
+  padding: 25px;
   border-radius: 12px;
   border: 1px solid #eee;
   margin-bottom: 20px;
@@ -63,6 +63,8 @@ select {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
 }
 .btn-main {
   background: #007bff;
@@ -93,15 +95,23 @@ td {
   border-radius: 4px;
   cursor: pointer;
 }
+
+/* Profile Grid & Ideal Box */
 .profile-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+  margin-bottom: 20px;
 }
 .grid-item {
   display: flex;
   flex-direction: column;
   gap: 5px;
+}
+.grid-item label {
+  font-weight: bold;
+  color: #666;
+  font-size: 0.85em;
 }
 .readonly-input {
   background: #f9f9f9 !important;
@@ -111,9 +121,9 @@ td {
 }
 .ideal-section {
   margin-top: 30px;
-  text-align: center;
   padding-top: 20px;
   border-top: 2px solid #eee;
+  text-align: center;
 }
 .ideal-box {
   font-size: 28px;
@@ -125,6 +135,8 @@ td {
   border-radius: 50px;
   margin: 10px 0;
 }
+
+/* Pagination */
 .pagination {
   display: flex;
   justify-content: center;
@@ -143,6 +155,7 @@ td {
   color: white;
   border-color: #007bff;
 }
+
 @media (max-width: 500px) {
   .profile-grid {
     grid-template-columns: 1fr;
