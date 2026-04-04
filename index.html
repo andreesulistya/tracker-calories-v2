@@ -23,16 +23,14 @@
                 <h3>Net Kalori: <span id="dashNet">0 kcal</span></h3>
                 <div class="summary-details">
                     <span style="color: #d9534f;">Masuk: <b id="dashIn">0</b></span> | 
-                    <span style="color: #5cb85c;">Keluar: <b id="dashOut">0</b></span>
+                    <span style="color: #28a745;">Keluar: <b id="dashOut">0</b></span>
                 </div>
             </div>
             
             <h4>Aktivitas Hari Ini</h4>
             <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr><th>Kegiatan</th><th>Tipe</th><th>Kalori</th></tr>
-                    </thead>
+                <table class="fixed-table">
+                    <thead><tr><th style="width: 50%;">Kegiatan</th><th style="width: 20%;">Tipe</th><th style="width: 30%;">Kalori</th></tr></thead>
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
@@ -40,16 +38,8 @@
             <hr style="margin: 30px 0;">
             <h4>Rekapitulasi Harian</h4>
             <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tanggal</th>
-                            <th>Masuk</th>
-                            <th>Keluar</th>
-                            <th>Net</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
+                <table class="fixed-table">
+                    <thead><tr><th>Tanggal</th><th>In</th><th>Out</th><th>Net</th><th>Status</th></tr></thead>
                     <tbody id="rekapTableBody"></tbody>
                 </table>
             </div>
@@ -59,26 +49,29 @@
             <h2>Catat Kalori</h2>
             <div class="card">
                 <div class="input-group">
-                    <label>Tanggal:</label>
-                    <input type="date" id="inputDate">
-                    <label>Nama Makanan / Olahraga:</label>
-                    <input type="text" id="foodName" placeholder="Contoh: Nasi Padang">
+                    <label>Tanggal:</label><input type="date" id="inputDate">
+                    <label>Nama Kegiatan:</label><input type="text" id="foodName" placeholder="Nasi Padang / Lari">
                     <label>Tipe:</label>
                     <select id="type">
-                        <option value="in">Kalori Masuk (Makan)</option>
-                        <option value="out">Kalori Keluar (Olahraga)</option>
+                        <option value="in">Masuk (Makan)</option>
+                        <option value="out">Keluar (Olahraga)</option>
                     </select>
-                    <label>Jumlah Kalori (kcal):</label>
-                    <input type="number" id="calories" placeholder="0">
+                    <input type="number" id="calories" placeholder="Jumlah Kalori">
                     <button class="btn-main" onclick="tambahItem()">Simpan Data</button>
                 </div>
             </div>
 
             <h3 style="margin-top: 30px;">Arsip Aktivitas (History)</h3>
             <div style="overflow-x: auto;">
-                <table>
+                <table class="fixed-table" id="archiveTable">
                     <thead>
-                        <tr><th>Tanggal</th><th>Kegiatan</th><th>Tipe</th><th>Kalori</th><th>Aksi</th></tr>
+                        <tr>
+                            <th style="width: 85px;">Tanggal</th>
+                            <th>Kegiatan</th>
+                            <th style="width: 45px;">Tipe</th>
+                            <th style="width: 60px;">Kcal</th>
+                            <th style="width: 85px;">Aksi</th>
+                        </tr>
                     </thead>
                     <tbody id="archiveTableBody"></tbody>
                 </table>
@@ -90,25 +83,16 @@
             <h2>Kalkulator BMR & TDEE</h2>
             <div class="card">
                 <div class="input-group">
-                    <label>Tanggal Penimbangan:</label><input type="date" id="bmrDate">
-                    <label>Gender:</label><select id="gender"><option value="male">Laki-laki</option><option value="female">Perempuan</option></select>
-                    <input type="number" id="bmr-age" placeholder="Usia (Tahun)">
-                    <input type="number" id="bmr-weight" placeholder="Berat (kg)">
-                    <input type="number" id="bmr-height" placeholder="Tinggi (cm)">
-                    <label>Aktivitas:</label>
-                    <select id="activity">
-                        <option value="1.2">Sedentary</option>
-                        <option value="1.375">Lightly Active</option>
-                        <option value="1.55">Moderately Active</option>
-                        <option value="1.725">Very Active</option>
-                    </select>
-                    <button class="btn-main" onclick="hitungBMR()">Hitung & Simpan</button>
+                    <label>Tanggal Fisik:</label><input type="date" id="bmrDate">
+                    <select id="gender"><option value="male">Laki-laki</option><option value="female">Perempuan</option></select>
+                    <input type="number" id="bmr-age" placeholder="Usia"><input type="number" id="bmr-weight" placeholder="Berat (kg)"><input type="number" id="bmr-height" placeholder="Tinggi (cm)">
+                    <select id="activity"><option value="1.2">Sedentary</option><option value="1.55">Moderately Active</option></select>
+                    <button class="btn-main" onclick="hitungBMR()">Update Fisik</button>
                 </div>
             </div>
-            <div id="bmr-result" class="result-box" style="display:none; margin-top:20px;"></div>
-            <h3 style="margin-top: 30px;">Riwayat Fisik</h3>
+            <h4>Riwayat Fisik</h4>
             <div style="overflow-x: auto;">
-                <table><thead><tr><th>Tanggal</th><th>Berat</th><th>BMR</th><th>TDEE</th><th>Aksi</th></tr></thead><tbody id="bmrTableBody"></tbody></table>
+                <table class="fixed-table"><thead><tr><th>Tgl</th><th>Berat</th><th>TDEE</th><th>Aksi</th></tr></thead><tbody id="bmrTableBody"></tbody></table>
             </div>
         </section>
 
@@ -116,34 +100,40 @@
             <h2>Profil Pengguna</h2>
             <div class="card">
                 <div class="profile-grid">
-                    <div class="grid-item"><label>Nama Lengkap</label><input type="text" id="profName" onchange="saveProfile()"></div>
-                    <div class="grid-item"><label>Usia</label><input type="text" id="dispAge" readonly class="readonly-input"></div>
-                    <div class="grid-item"><label>Berat Badan</label><input type="text" id="dispWeight" readonly class="readonly-input"></div>
-                    <div class="grid-item"><label>Tinggi Badan</label><input type="text" id="dispHeight" readonly class="readonly-input"></div>
-                    <div class="grid-item"><label>BMR Dasar</label><input type="text" id="dispBmr" readonly class="readonly-input"></div>
-                    <div class="grid-item"><label>TDEE (Maint.)</label><input type="text" id="dispTdee" readonly class="readonly-input"></div>
+                    <div class="grid-item"><label>Nama</label><input type="text" id="profName" onchange="saveProfile()"></div>
+                    <div class="grid-item"><label>TDEE</label><input type="text" id="dispTdee" readonly class="readonly-input"></div>
                 </div>
                 <div class="ideal-section">
-                    <h4>Estimasi Berat Badan Ideal</h4>
-                    <div class="ideal-box"><span id="idealWeight">-</span> <small>kg</small></div>
-
-<hr style="margin: 20px 0;">
-<div class="storage-actions" style="text-align: center; display: flex; flex-direction: column; gap: 10px;">
-    <h4>Backup & Sinkronisasi Data</h4>
-    <button class="btn-main" style="background: #6c757d;" onclick="exportData()">Export Data (.json)</button>
-    
-    <label class="btn-main" style="background: #28a745; cursor: pointer; display: inline-block;">
-        Import Data
-        <input type="file" id="importFile" style="display: none;" onchange="importData(event)">
-    </label>
-    <p style="font-size: 0.75em; color: #666;">*Gunakan file hasil export untuk pindah device.</p>
-</div>
-
-
+                    <h4>Berat Badan Ideal: <span id="idealWeight">-</span> kg</h4>
+                </div>
+                <hr style="margin: 20px 0;">
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn-main" style="background: #6c757d;" onclick="exportData()">Export Backup (.json)</button>
+                    <label class="btn-main" style="background: #28a745; text-align: center; cursor: pointer;">
+                        Import Backup <input type="file" style="display:none" onchange="importData(event)">
+                    </label>
                 </div>
             </div>
         </section>
     </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Data</h3>
+            <div class="input-group">
+                <input type="hidden" id="editIndex">
+                <input type="date" id="editDate">
+                <input type="text" id="editName">
+                <select id="editType"><option value="in">Masuk</option><option value="out">Keluar</option></select>
+                <input type="number" id="editCalories">
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn-main" onclick="simpanEdit()" style="flex: 1; background: #28a745;">Update</button>
+                    <button class="btn-main" onclick="tutupModal()" style="flex: 1; background: #6c757d;">Batal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
