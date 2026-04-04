@@ -5,7 +5,7 @@ let profile = JSON.parse(localStorage.getItem('profile')) || { name: '', age: 0,
 let currentPage = 1;
 const rowsPerPage = 10;
 
-// Fungsi untuk mendapatkan tanggal hari ini sesuai zona waktu lokal (YYYY-MM-DD)
+// Fungsi Tanggal Lokal (WIB) untuk Nama File & Filter Dashboard
 const getTodayKey = () => {
     const d = new Date();
     const year = d.getFullYear();
@@ -14,7 +14,6 @@ const getTodayKey = () => {
     return `${year}-${month}-${day}`;
 };
 
-// Jalankan UI pertama kali
 updateUI();
 
 // --- 2. NAVIGATION ---
@@ -30,7 +29,6 @@ function tambahItem() {
     const tipe = document.getElementById('type').value;
     const kalori = parseInt(document.getElementById('calories').value);
     
-    // Gunakan tanggal dari picker atau otomatis hari ini (Lokal)
     let tglData = inputDate ? inputDate : getTodayKey();
 
     if (!nama || isNaN(kalori)) return alert("Harap isi nama dan jumlah kalori!");
@@ -44,10 +42,9 @@ function tambahItem() {
     });
 
     saveData();
-    currentPage = 1; // Balik ke page 1 arsip
+    currentPage = 1;
     updateUI();
     
-    // Bersihkan form
     document.getElementById('foodName').value = '';
     document.getElementById('calories').value = '';
 }
@@ -56,7 +53,7 @@ function tambahItem() {
 function updateUI() {
     const tglHariIni = getTodayKey();
 
-    // A. DASHBOARD (Hanya Aktivitas Hari Ini)
+    // A. DASHBOARD (Filter Hari Ini)
     const tbodyLog = document.getElementById('tableBody');
     let totalIn = 0, totalOut = 0;
     
@@ -89,12 +86,11 @@ function updateUI() {
         document.getElementById('dashNet').innerHTML = `${net} kcal <span style="color:${colorNet}">${ketNet}</span>`;
     }
 
-    // B. ARSIP HISTORY (Menu Input Kalori)
+    // B. ARSIP HISTORY (Pagination & Sorting Terbaru)
     const archiveBody = document.getElementById('archiveTableBody');
     const paginCtrl = document.getElementById('paginationCtrl');
     if (archiveBody) {
         archiveBody.innerHTML = '';
-        // Urutkan: Tanggal terbaru (Desc), lalu Waktu input terbaru (Desc)
         let sortedLogs = logs.map((item, index) => ({...item, originalIndex: index}))
                              .sort((a, b) => b.tanggal.localeCompare(a.tanggal) || b.timestamp - a.timestamp);
         
@@ -125,7 +121,7 @@ function updateUI() {
 }
 
 function renderRekapAndProfile() {
-    // C. REKAPITULASI HARIAN (Hanya Total per Hari)
+    // C. REKAPITULASI (Total Per Hari + Warna)
     const rekapBody = document.getElementById('rekapTableBody');
     if (rekapBody) {
         rekapBody.innerHTML = '';
@@ -150,7 +146,7 @@ function renderRekapAndProfile() {
         });
     }
 
-    // D. RIWAYAT FISIK (BMR)
+    // D. BMR & PROFILE
     const tbodyBmr = document.getElementById('bmrTableBody');
     if (tbodyBmr) {
         tbodyBmr.innerHTML = '';
@@ -161,7 +157,6 @@ function renderRekapAndProfile() {
         });
     }
 
-    // E. PROFILE DATA
     document.getElementById('profName').value = profile.name || '';
     document.getElementById('dispAge').value = profile.age ? profile.age + " Thn" : "-";
     document.getElementById('dispWeight').value = profile.weight ? profile.weight + " kg" : "-";
@@ -174,41 +169,17 @@ function renderRekapAndProfile() {
     }
 }
 
-// --- 5. CALCULATIONS ---
-function hitungBMR() {
-    const weight = parseFloat(document.getElementById('bmr-weight').value);
-    const height = parseFloat(document.getElementById('bmr-height').value);
-    const age = parseInt(document.getElementById('bmr-age').value);
-    const gender = document.getElementById('gender').value;
-    const act = parseFloat(document.getElementById('activity').value);
-    const bmrDate = document.getElementById('bmrDate').value || getTodayKey();
-
-    if (!weight || !height || !age) return alert("Lengkapi data fisik!");
-    
-    let bmrVal = (10 * weight) + (6.25 * height) - (5 * age) + (gender === 'male' ? 5 : -161);
-    let tdee = Math.round(bmrVal * act);
-
-    riwayatFisik.push({ tanggal: bmrDate, berat: weight, bmr: Math.round(bmrVal), tdee });
-    profile = { ...profile, age, weight, height, bmr: Math.round(bmrVal), tdee };
-    
-    saveData();
-    updateUI();
-}
-
-// --- 6. STORAGE & BACKUP ---
-function saveData() {
-    localStorage.setItem('logs', JSON.stringify(logs));
-    localStorage.setItem('riwayatFisik', JSON.stringify(riwayatFisik));
-    localStorage.setItem('profile', JSON.stringify(profile));
-}
-
+// --- 5. EXPORT / IMPORT (NAMA FILE BERDASARKAN TANGGAL) ---
 function exportData() {
-    const tgl = getTodayKey();
+    const tgl = getTodayKey(); // Ambil tanggal hari ini (YYYY-MM-DD)
     const backupData = { logs, riwayatFisik, profile };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData));
     const dlAnchor = document.createElement('a');
     dlAnchor.setAttribute("href", dataStr);
-    dlAnchor.setAttribute("download", `backup_diet_${tgl}.json`);
+    
+    // Nama file unik: backup_diet_2026-04-05.json
+    dlAnchor.setAttribute("download", `tracker_data_${tgl}.json`); 
+    
     dlAnchor.click();
 }
 
@@ -219,7 +190,7 @@ function importData(event) {
     reader.onload = function(e) {
         try {
             const imported = JSON.parse(e.target.result);
-            if (confirm("Hapus data lama dan ganti dengan data dari file ini?")) {
+            if (confirm("Ganti data lama dengan data dari file backup ini?")) {
                 logs = imported.logs || [];
                 riwayatFisik = imported.riwayatFisik || [];
                 profile = imported.profile || profile;
@@ -232,8 +203,29 @@ function importData(event) {
     reader.readAsText(file);
 }
 
-// --- 7. HELPERS ---
+// --- 6. BASIC FUNCTIONS ---
+function hitungBMR() {
+    const weight = parseFloat(document.getElementById('bmr-weight').value);
+    const height = parseFloat(document.getElementById('bmr-height').value);
+    const age = parseInt(document.getElementById('bmr-age').value);
+    const gender = document.getElementById('gender').value;
+    const act = parseFloat(document.getElementById('activity').value);
+    const bmrDate = document.getElementById('bmrDate').value || getTodayKey();
+
+    if (!weight || !height || !age) return alert("Lengkapi data!");
+    let bmrVal = (10 * weight) + (6.25 * height) - (5 * age) + (gender === 'male' ? 5 : -161);
+    let tdee = Math.round(bmrVal * act);
+    riwayatFisik.push({ tanggal: bmrDate, berat: weight, bmr: Math.round(bmrVal), tdee });
+    profile = { ...profile, age, weight, height, bmr: Math.round(bmrVal), tdee };
+    saveData(); updateUI();
+}
+
+function saveData() {
+    localStorage.setItem('logs', JSON.stringify(logs));
+    localStorage.setItem('riwayatFisik', JSON.stringify(riwayatFisik));
+    localStorage.setItem('profile', JSON.stringify(profile));
+}
 function changePage(p) { currentPage = p; updateUI(); }
-function hapusLog(i) { if(confirm("Hapus aktivitas ini?")) { logs.splice(i,1); saveData(); updateUI(); } }
-function hapusBMR(i) { if(confirm("Hapus riwayat fisik?")) { riwayatFisik.splice(i,1); saveData(); updateUI(); } }
+function hapusLog(i) { if(confirm("Hapus?")) { logs.splice(i,1); saveData(); updateUI(); } }
+function hapusBMR(i) { if(confirm("Hapus?")) { riwayatFisik.splice(i,1); saveData(); updateUI(); } }
 function saveProfile() { profile.name = document.getElementById('profName').value; saveData(); }
