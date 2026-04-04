@@ -16,11 +16,13 @@ function tambahItem() {
     const nama = document.getElementById('foodName').value;
     const tipe = document.getElementById('type').value;
     const kalori = parseInt(document.getElementById('calories').value);
-    let tglFinal = inputDate ? new Date(inputDate).toLocaleDateString('id-ID') : new Date().toLocaleDateString('id-ID');
+    
+    // Simpan dalam format mentah YYYY-MM-DD agar sorting akurat
+    let tglData = inputDate ? inputDate : new Date().toISOString().split('T')[0];
 
     if (!nama || isNaN(kalori)) return alert("Isi data lengkap!");
 
-    logs.push({ tanggal: tglFinal, nama, tipe, kalori, timestamp: new Date().getTime() });
+    logs.push({ tanggal: tglData, nama, tipe, kalori, timestamp: new Date().getTime() });
     saveData();
     currentPage = 1;
     updateUI();
@@ -37,20 +39,21 @@ function hitungBMR() {
     const act = parseFloat(document.getElementById('activity').value);
 
     if (!weight || !height || !age) return alert("Lengkapi data fisik!");
-    let tglFinal = bmrDate ? new Date(bmrDate).toLocaleDateString('id-ID') : new Date().toLocaleDateString('id-ID');
+    let tglData = bmrDate ? bmrDate : new Date().toISOString().split('T')[0];
+    
     let bmrVal = (10 * weight) + (6.25 * height) - (5 * age) + (gender === 'male' ? 5 : -161);
     const tdeeVal = Math.round(bmrVal * act);
 
-    riwayatFisik.push({ tanggal: tglFinal, berat: weight, bmr: Math.round(bmrVal), tdee: tdeeVal });
+    riwayatFisik.push({ tanggal: tglData, berat: weight, bmr: Math.round(bmrVal), tdee: tdeeVal });
     profile = { ...profile, age, weight, height, bmr: Math.round(bmrVal), tdee: tdeeVal };
     saveData();
     updateUI();
 }
 
 function updateUI() {
-    const tglHariIni = new Date().toLocaleDateString('id-ID');
+    const tglHariIni = new Date().toISOString().split('T')[0];
 
-    // 1. DASHBOARD (TANPA KOLOM AKSI)
+    // 1. DASHBOARD (HARI INI)
     const tbodyLog = document.getElementById('tableBody');
     let totalIn = 0, totalOut = 0;
     if (tbodyLog) {
@@ -68,23 +71,28 @@ function updateUI() {
             }
         });
         const net = totalIn - totalOut;
+        let colorNet = net < 0 ? '#5cb85c' : net > 0 ? '#d9534f' : '#007bff';
+        let ketNet = net < 0 ? '(Defisit)' : net > 0 ? '(Surplus)' : '(Seimbang)';
+        
         document.getElementById('dashIn').innerText = totalIn;
         document.getElementById('dashOut').innerText = totalOut;
-        document.getElementById('dashNet').innerHTML = `${net} kcal <small style="color:${net < 0 ? '#5cb85c':'#d9534f'}">${net < 0 ? '(Defisit)':'(Surplus)'}</small>`;
+        document.getElementById('dashNet').innerHTML = `${net} kcal <small style="color:${colorNet}">${ketNet}</small>`;
     }
 
-    // 2. ARSIP HISTORY (DENGAN AKSI HAPUS)
+    // 2. ARSIP HISTORY (TAB INPUT)
     const archiveBody = document.getElementById('archiveTableBody');
     const paginCtrl = document.getElementById('paginationCtrl');
     if (archiveBody) {
         archiveBody.innerHTML = '';
         let sortedLogs = logs.map((item, index) => ({...item, originalIndex: index}))
-                             .sort((a, b) => b.timestamp - a.timestamp);
+                             .sort((a, b) => b.tanggal.localeCompare(a.tanggal) || b.timestamp - a.timestamp);
+        
         const start = (currentPage - 1) * rowsPerPage;
         const paginatedItems = sortedLogs.slice(start, start + rowsPerPage);
 
         paginatedItems.forEach(item => {
-            archiveBody.innerHTML += `<tr><td><small>${item.tanggal}</small></td><td>${item.nama}</td><td>${item.tipe==='in'?'In':'Out'}</td>
+            const tglDisp = new Date(item.tanggal).toLocaleDateString('id-ID');
+            archiveBody.innerHTML += `<tr><td><small>${tglDisp}</small></td><td>${item.nama}</td><td>${item.tipe==='in'?'In':'Out'}</td>
                 <td>${item.kalori}</td><td><button class="btn-hapus" onclick="hapusLog(${item.originalIndex})">x</button></td></tr>`;
         });
         const totalPages = Math.ceil(sortedLogs.length / rowsPerPage);
@@ -100,6 +108,7 @@ function updateUI() {
 function changePage(p) { currentPage = p; updateUI(); }
 
 function renderRekapAndProfile() {
+    // REKAPITULASI DENGAN WARNA & SORTING TANGGAL
     const rekapBody = document.getElementById('rekapTableBody');
     if (rekapBody) {
         rekapBody.innerHTML = '';
@@ -108,19 +117,37 @@ function renderRekapAndProfile() {
             if (!rekapData[item.tanggal]) rekapData[item.tanggal] = { in: 0, out: 0 };
             if (item.tipe === 'in') rekapData[item.tanggal].in += item.kalori; else rekapData[item.tanggal].out += item.kalori;
         });
-        Object.keys(rekapData).reverse().forEach(tgl => {
+
+        // Sorting Tanggal Terbaru ke Terlama
+        Object.keys(rekapData).sort((a, b) => b.localeCompare(a)).forEach(tgl => {
             const d = rekapData[tgl];
-            rekapBody.innerHTML += `<tr><td><b>${tgl}</b></td><td>${d.in}</td><td>${d.out}</td><td>${d.in-d.out}</td></tr>`;
+            const netH = d.in - d.out;
+            const tglDisp = new Date(tgl).toLocaleDateString('id-ID');
+            
+            // Aturan Warna Net
+            let colorStatus = netH < 0 ? '#5cb85c' : netH > 0 ? '#d9534f' : '#007bff';
+
+            rekapBody.innerHTML += `<tr>
+                <td><b>${tglDisp}</b></td>
+                <td>${d.in}</td>
+                <td>${d.out}</td>
+                <td style="color:${colorStatus}; font-weight:bold;">${netH}</td>
+            </tr>`;
         });
     }
+
+    // RIWAYAT FISIK
     const tbodyBmr = document.getElementById('bmrTableBody');
     if (tbodyBmr) {
         tbodyBmr.innerHTML = '';
-        [...riwayatFisik].reverse().forEach((item, i) => {
-            const origIdx = riwayatFisik.length - 1 - i;
-            tbodyBmr.innerHTML += `<tr><td>${item.tanggal}</td><td>${item.berat} kg</td><td>${item.bmr}</td><td>${item.tdee}</td><td><button class="btn-hapus" onclick="hapusBMR(${origIdx})">x</button></td></tr>`;
+        [...riwayatFisik].sort((a,b) => b.tanggal.localeCompare(a.tanggal)).forEach((item, i) => {
+            const origIdx = riwayatFisik.findIndex(x => x === item);
+            const tglDisp = new Date(item.tanggal).toLocaleDateString('id-ID');
+            tbodyBmr.innerHTML += `<tr><td>${tglDisp}</td><td>${item.berat} kg</td><td>${item.bmr}</td><td>${item.tdee}</td><td><button class="btn-hapus" onclick="hapusBMR(${origIdx})">x</button></td></tr>`;
         });
     }
+
+    // PROFILE UPDATE
     document.getElementById('profName').value = profile.name || '';
     document.getElementById('dispAge').value = profile.age ? profile.age + " Thn" : "-";
     document.getElementById('dispWeight').value = profile.weight ? profile.weight + " kg" : "-";
